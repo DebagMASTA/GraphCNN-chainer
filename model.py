@@ -32,16 +32,16 @@ class GraphCNN(chainer.Chain):
             np.save(kwargs['out_dir']+'/pooling_inds.npy',pooling_inds)
 
         else:
-            graphs=np.load(kwargs['graph_dir']+'graphs.npy')
-            pooling_inds=np.load(kwargs['graph_dir']+'pooling_inds.npy')
+            graphs=np.load(kwargs['graph_dir']+'graphs.npy', allow_pickle=True)
+            pooling_inds=np.load(kwargs['graph_dir']+'pooling_inds.npy', allow_pickle=True)
 
         with self.init_scope():
             self.gc1 = GraphConvolution(in_channels=in_channels, out_channels=32, A=graphs[0], K=25)
-            # self.p1 = GraphMaxPoolingFunction(pooling_inds[0])
-            # self.gc2 = GraphConvolution(in_channels=None, out_channels=64, A=graphs[1], K=25)
-            # self.p2 = GraphMaxPoolingFunction(pooling_inds[1])
-            # self.gc3 = GraphConvolution(in_channels=None, out_channels=64, A=graphs[2], K=25)
-            # self.p3 = GraphMaxPoolingFunction(pooling_inds[2])
+            self.p1 = GraphMaxPoolingFunction(pooling_inds[0])
+            self.gc2 = GraphConvolution(in_channels=None, out_channels=64, A=graphs[1], K=25)
+            self.p2 = GraphMaxPoolingFunction(pooling_inds[1])
+            self.gc3 = GraphConvolution(in_channels=None, out_channels=64, A=graphs[2], K=25)
+            self.p3 = GraphMaxPoolingFunction(pooling_inds[2])
 
             self.fc1 = L.Linear(None, 512, initialW=initializer)
             self.fc2 = L.Linear(None, out_channels, initialW=initializer)
@@ -62,11 +62,11 @@ class GraphCNN(chainer.Chain):
         # y.to_csv('D:/PycharmProjects/GraphCNN-for-Brain-Spect/results/0714/test.csv')
 
         dropout_ratio = 0.5
-        h = F.relu(self.gc1(x))
+        # h = F.relu(self.gc1(x))
 
-        # h = self.p1(F.relu(self.gc1(x)))
-        # h = self.p2(F.relu(self.gc2(h)))
-        # h = self.p3(F.relu(self.gc3(h)))
+        h = self.p1(F.relu(self.gc1(x)))
+        h = self.p2(F.relu(self.gc2(h)))
+        h = self.p3(F.relu(self.gc3(h)))
         h_fc1 = F.relu(F.dropout(self.fc1(h), dropout_ratio))
 
         if return_featuremap==True:

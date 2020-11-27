@@ -26,9 +26,9 @@ def main():
     parser.add_argument('--data_dir', '-D', default='D:/PycharmProjects/data/',
                         help='input data directory path')
 
-    parser.add_argument('--out', '-o', default= 'results/test_20201119',
+    parser.add_argument('--out', '-o', default= 'results/test_20201121',
                         help='Directory to output the result')
-    parser.add_argument('--frip', '-f', default= True,
+    parser.add_argument('--flip', '-f', default= True,
                         help='horizontal frip or not')
     parser.add_argument('--graph', '-gr', default="Graph/NN8.npy",
                         help='graph directory path')

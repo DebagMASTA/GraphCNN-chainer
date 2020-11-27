@@ -8,7 +8,6 @@ import os, sys, time
 import argparse, yaml, shutil, math
 import numpy as np
 import chainer
-import SimpleITK as sitk
 import csv
 import pandas as pd
 

@@ -19,18 +19,18 @@ def distance_sklearn_metrics(z, k=4, metric='euclidean'):
     return d, idx
 
 class BrainSpectDataset(chainer.dataset.DatasetMixin):
-    def __init__(self, data_dir, data_list_txt, frip, A):
+    def __init__(self, data_dir, data_list_txt, flip, A):
         """
         """
         self._root = data_dir
         self._label_dtype = np.int32
         self._dtype = np.float32
-        self._frip=frip
+        self._flip=flip
         self._A=A
         data_list_txt=data_dir+data_list_txt
 
-        if self._frip==True:
-            self._frip_ind=np.load(self._root+"/frip_ind.npy")
+        if self._flip==True:
+            self._flip_ind=np.load(self._root+"/flip_ind.npy")
 
         path_pairs = []
         with open(data_list_txt) as paths_file:
@@ -110,9 +110,9 @@ class BrainSpectDataset(chainer.dataset.DatasetMixin):
     def get_example(self, i):
         intensity,label=self._dataset[i]
 
-        if self._frip==True:
+        if self._flip==True:
             if np.random.rand()>0.5:
-                intensity=intensity[:,self._frip_ind]
+                intensity=intensity[:,self._flip_ind]
 
         return label,intensity
 

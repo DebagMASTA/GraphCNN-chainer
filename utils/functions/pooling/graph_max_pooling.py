@@ -80,14 +80,6 @@ class GraphMaxPoolingFunction(function.Function):
             y = xp.empty((N_coarse, c, n_batch), dtype=x.dtype)
             self.max_inds = xp.empty((N_coarse, c, n_batch), dtype=np.int32)
             pooling_inds = cuda.to_gpu(self.pooling_inds)
-            print('N_coarse',type(N_coarse))
-            print('p_dim',type(p_dim))
-            print('pooling_inds',type(pooling_inds))
-            print('x',type(x))
-            print('y',type(y))
-            print('self.max_inds',type(self.max_inds))
-
-
 
             gpu_graphpool_fwd(N_coarse, p_dim, pooling_inds,
                               x, y, self.max_inds)

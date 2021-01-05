@@ -26,10 +26,10 @@ def main():
     parser.add_argument('--data_dir', '-D', default='D:/PycharmProjects/data/',
                         help='input data directory path')
 
-    parser.add_argument('--out', '-o', default= 'results/test_20201121',
+    parser.add_argument('--out', '-o', default= 'results/test_20210105',
                         help='Directory to output the result')
     parser.add_argument('--flip', '-f', default= True,
-                        help='horizontal frip or not')
+                        help='horizontal flip or not')
     parser.add_argument('--graph', '-gr', default="Graph/NN8.npy",
                         help='graph directory path')
 
@@ -79,9 +79,9 @@ def main():
 
     A = np.load(os.path.join(args.data_dir,args.graph))
 
-    train = BrainSpectDataset(data_dir=args.data_dir, data_list_txt=train_list, frip=args.frip, A=A)
-    val1 = BrainSpectDataset(data_dir=args.data_dir, data_list_txt=val1_list, frip=False, A=A)
-    val2 = BrainSpectDataset(data_dir=args.data_dir, data_list_txt=val2_list, frip=False, A=A)
+    train = BrainSpectDataset(data_dir=args.data_dir, data_list_txt=train_list, flip=args.flip, A=A)
+    val1 = BrainSpectDataset(data_dir=args.data_dir, data_list_txt=val1_list, flip=False, A=A)
+    val2 = BrainSpectDataset(data_dir=args.data_dir, data_list_txt=val2_list, flip=False, A=A)
 
     train_iter = chainer.iterators.SerialIterator(train, args.batchsize)
     val1_iter = chainer.iterators.SerialIterator(val1, args.batchsize,
@@ -140,7 +140,6 @@ def main():
         trainer.extend(extensions.PlotReport(['train/acc', 'val1/acc','val2/acc'], 'epoch', file_name='accuracy.png', trigger=display_interval))
 
 
-    trainer.extend(extensions.ProgressBar(update_interval=10))
 
     if args.resume:
         # Resume from a snapshot

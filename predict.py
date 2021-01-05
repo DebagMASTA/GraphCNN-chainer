@@ -299,7 +299,7 @@ def main():
 
             case = re.findall('[A-Z]-[0-9]+', path_pairs[i][0])
             case=str(case)
-            case=case.replace('\'','').replace('[','').replace(']','')
+            case=case.replace('\'','').replace('[','').replace(']','-x')
             # print(type(case))
             # print(type(case))
 

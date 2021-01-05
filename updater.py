@@ -14,10 +14,6 @@ class GraphCnnUpdater(chainer.training.StandardUpdater):
 
     def loss_softmax_cross_entropy(self, predict, ground_truth):
         eps = 1e-16
-        print('predict\n', predict)
-        print('ground_truth\n', ground_truth)
-        print('F.log(predict + eps) * ground_truth',F.log(predict + eps) * ground_truth)
-        print('Loss',-F.mean(F.log(predict + eps) * ground_truth))
 
         cross_entropy = -F.mean(F.log(predict + eps) * ground_truth)
         return cross_entropy

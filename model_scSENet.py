@@ -139,18 +139,28 @@ class Block(chainer.ChainList):
 
 
 class GraphCNN(chainer.Chain):
-    def __init__(self, A, in_channels=5, out_channels=4):
+    def __init__(self, A, in_channels=5, out_channels=4,**kwargs):
         """
         This model is based on https://github.com/maggie0106/Graph-CNN-in-3D-Point-Cloud-Classification
         """
         initializer = chainer.initializers.HeNormal()
         super(GraphCNN, self).__init__()
 
-        # Precompute the coarsened graphs
-        graphs, pooling_inds = coarsen(A, levels=6)
-        # In order to simulate 2x2 max pooling, combine the 4 levels
-        # of graphs into 2 levels by combining pooling indices.
-        graphs, pooling_inds = combine(graphs, pooling_inds, 2)
+        if kwargs['out_dir'] is not None:
+
+            # Precompute the coarsened graphs
+            graphs, pooling_inds = coarsen(A, levels=6)
+            # In order to simulate 2x2 max pooling, combine the 4 levels
+            # of graphs into 2 levels by combining pooling indices.
+            graphs, pooling_inds = combine(graphs, pooling_inds, 2)
+
+            np.save(kwargs['out_dir']+'/graphs.npy',graphs)
+            np.save(kwargs['out_dir']+'/pooling_inds.npy',pooling_inds)
+
+        else:
+            graphs=np.load(kwargs['graph_dir']+'graphs.npy', allow_pickle=True)
+            pooling_inds=np.load(kwargs['graph_dir']+'pooling_inds.npy', allow_pickle=True)
+
 
         with self.init_scope():
             self.gc1 = GraphConvolution(in_channels=in_channels, out_channels=16, A=graphs[0], K=25)

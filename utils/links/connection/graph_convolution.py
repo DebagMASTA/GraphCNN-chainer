@@ -62,7 +62,6 @@ class GraphConvolution(link.Link):
 
         self.K = K
         self.out_channels = out_channels
-
         self.wscale = wscale
 
         with self.init_scope():

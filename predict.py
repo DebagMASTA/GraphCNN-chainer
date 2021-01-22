@@ -33,7 +33,7 @@ def main():
     parser.add_argument('--base', '-B', default=os.path.dirname(os.path.abspath(__file__)),
                         help='base directory path of program files')
     # parser.add_argument('--graph', '-gp', default="results/generated_graph/NN8.npy",
-    #                     help='horizontal frip or not')
+    #                     help='horizontal flip or not')
     parser.add_argument('--input', default='results/test/',
                         help='Path to log file')
     parser.add_argument('--loss_minimam', default=False,
@@ -151,8 +151,11 @@ def main():
     val2_acc_max_value = np.max(acc[2])
     val1_loss_min_value=np.min(loss[1])
     val2_loss_min_value=np.min(loss[2])
-    print(val1_optimal_epoch)
-    print(epoch_list[val1_optimal_epoch])
+
+    val1_optimal_epoch=int(epoch_list[val1_optimal_epoch])
+    val2_optimal_epoch=int(epoch_list[val2_optimal_epoch])
+
+
     """
     num = 2 #移動平均の個数
     b = np.ones(num)/num
@@ -162,51 +165,49 @@ def main():
     #plt.plot(itr_list, loss_list2, label='main/loss', lw=2)
     #plt.plot(itr_list, val_loss_list2, label='validation/main/loss', lw=2)
     """
-    # 折れ線グラフを出力
+    # Lossグラフを出力
+    loss_fig_min=0.0
+    loss_fig_max=1.0
+
     plt.plot(epoch_list, train_loss_list, '-x', label='train/loss', lw=2)
     plt.plot(epoch_list, val1_loss_list, '-x', label='val1/loss', lw=2)
     plt.plot(epoch_list, val2_loss_list, '-x', label='val2/loss', lw=2)
-    # if args.loss_minimam==True:
-    #     plt.plot(epoch_list[val1_optimal_epoch], val1_loss_min_value, 'o', markersize=15,color="None", markeredgewidth=3,markeredgecolor="cyan")
-    #     plt.plot(epoch_list[val2_optimal_epoch], val2_loss_min_value, 'o', markersize=15,color="None", markeredgewidth=3,markeredgecolor="cyan")
+    plt.vlines([val1_optimal_epoch],loss_fig_min,loss_fig_max,'cyan',linestyles='dashed')
+    plt.vlines([val2_optimal_epoch],loss_fig_min,loss_fig_max,'magenta',linestyles='dashed')
+
     plt.yscale("linear")
     plt.grid(which="both")
-    plt.ylim([0., 0.6])
-    # plt.legend()
-    # plt.title("loss curve")
+    plt.ylim([loss_fig_min, loss_fig_max])
+    plt.legend(bbox_to_anchor=(1, 1),loc='upper left')
+    plt.title("fold_{} epoch{},{} were selected".format(group,val1_optimal_epoch,val2_optimal_epoch))
     plt.xlabel("epoch")
     plt.ylabel("loss")
-    plt.tight_layout()
-    plt.savefig(args.input + loss_curve_name)
+
+    plt.savefig(args.input + loss_curve_name,bbox_inches='tight')
     plt.close()
 
     # ACCグラフを出力
-    plt.plot(epoch_list, train_acc_list, '-x', label='train/acc', lw=2, color='blue')
-    plt.plot(epoch_list, val1_acc_list, '-x', label='val1/acc', lw=2, color='green')
-    plt.plot(epoch_list, val2_acc_list, '-x', label='val2/acc', lw=2, color='red')
-    # if args.loss_minimam==False:
-    #     plt.plot(epoch_list[val1_optimal_epoch], val1_acc_max_value, 'o', markersize=15,color="None", markeredgewidth=3,markeredgecolor="cyan")
-    #     plt.plot(epoch_list[val2_optimal_epoch], val2_acc_max_value, 'o', markersize=15,color="None", markeredgewidth=3,markeredgecolor="cyan")
+    acc_fig_min=0.0
+    acc_fig_max=1.0
 
-    # plt.plot(epoch_list[np.where(val_acc_list == np.amax(val_acc_list))], val_acc_list[np.argmax()np.amax(val_acc_list)], 'o', markersize=10,color="pink")
-
-    # plt.text(epoch_list[np.where(val_acc_list == np.amax(val_acc_list))], np.amax(val_acc_list),
-    #          str(int(epoch_list[np.where(val_acc_list == np.amax(val_acc_list))])), ha='center', va='top',
-    #          fontsize=10)
+    plt.plot(epoch_list, train_acc_list, '-x', label='train/acc', lw=2)
+    plt.plot(epoch_list, val1_acc_list, '-x', label='val1/acc', lw=2)
+    plt.plot(epoch_list, val2_acc_list, '-x', label='val2/acc', lw=2)
+    plt.vlines([val1_optimal_epoch],loss_fig_min,loss_fig_max,'cyan',linestyles='dashed')
+    plt.vlines([val2_optimal_epoch],loss_fig_min,loss_fig_max,'magenta',linestyles='dashed')
 
     plt.yscale("linear")
     plt.grid(which="both")
-    plt.ylim([0.3, 1.])
-    # plt.legend()
-    # plt.title("accuracy curve")
+    plt.ylim([acc_fig_min,acc_fig_max])
+    plt.legend(bbox_to_anchor=(1, 1),loc='upper left')
+    plt.title("fold_{} epoch{},{} were selected".format(group,val1_optimal_epoch,val2_optimal_epoch))
     plt.xlabel("epoch")
     plt.ylabel("accuracy")
-    plt.tight_layout()
-    plt.savefig(args.input + acc_curve_name)
+    plt.savefig(args.input + acc_curve_name,bbox_inches='tight')
     plt.close()
 
-    model1=args.input+'gcnn_epoch_{}.npz'.format(int(epoch_list[val1_optimal_epoch]))
-    model2=args.input+'gcnn_epoch_{}.npz'.format(int(epoch_list[val2_optimal_epoch]))
+    model1=args.input+'gcnn_epoch_{}.npz'.format(val1_optimal_epoch)
+    model2=args.input+'gcnn_epoch_{}.npz'.format(val2_optimal_epoch)
     models=[model1,model2]
     test_lists=[test1_list,test2_list]
     out_path_list=[out1_dir,out2_dir]
@@ -223,10 +224,10 @@ def main():
         model=models[j]
         max_value=max_values[j]
 
-        test = BrainSpectDataset(data_dir=data_dir, data_list_txt=test_list,frip=False,A=A)
+        test = BrainSpectDataset(data_dir=data_dir, data_list_txt=test_list,flip=False,A=A)
         gcnn = GraphCNN(A=A,graph_dir=os.path.join(args.base,args.input),out_dir=None)
 
-        chainer.serializers.load_npz(model, gcnn)
+        chainer.serializers.load_npz(model, gcnn,strict=False)
         if args.gpu >= 0:
             chainer.backends.cuda.set_max_workspace_size(2 * 512 * 1024 * 1024)
             chainer.global_config.autotune = True
